@@ -1,49 +1,65 @@
-const progress = document.getElementById('progress')
-const prev = document.getElementById('prev')
-const next = document.getElementById('next')
-const circles = document.querySelectorAll('.circle')
+const video = document.getElementById('video');
+const play = document.getElementById('play');
+const stop = document.getElementById('stop');
+const progress = document.getElementById('progress');
+const timestamp = document.getElementById('timestamp');
 
-let currentActive = 1
-
-next.addEventListener('click', () => {
-    currentActive++
-
-    if(currentActive > circles.length) {
-        currentActive = circles.length
-    }
-
-    update()
-})
-
-prev.addEventListener('click', () => {
-    currentActive--
-
-    if(currentActive < 1) {
-        currentActive = 1
-    }
-
-    update()
-})
-
-function update() {
-    circles.forEach((circle, idx) => {
-        if(idx < currentActive) {
-            circle.classList.add('active')
-        } else {
-            circle.classList.remove('active')
-        }
-    })
-
-    const actives = document.querySelectorAll('.active')
-
-    progress.style.width = (actives.length - 1) / (circles.length - 1) * 100 + '%'
-
-    if(currentActive === 1) {
-        prev.disabled = true
-    } else if(currentActive === circles.length) {
-        next.disabled = true
-    } else {
-        prev.disabled = false
-        next.disabled = false
-    }
+// Play & pause video
+function toggleVideoStatus() {
+  if (video.paused) {
+    video.play();
+  } else {
+    video.pause();
+  }
 }
+
+// update play/pause icon
+function updatePlayIcon() {
+  if (video.paused) {
+    play.innerHTML = '<i class="fa fa-play fa-2x"></i>';
+  } else {
+    play.innerHTML = '<i class="fa fa-pause fa-2x"></i>';
+  }
+}
+
+// Update progress & timestamp
+function updateProgress() {
+  progress.value = (video.currentTime / video.duration) * 100;
+
+  // Get the minutes
+  let mins = Math.floor(video.currentTime / 60);
+  if(mins < video.duration){
+    mins = '0' + String(mins);
+  }
+
+  // Get Seconds
+  let secs = Math.floor(video.currentTime % 60);
+  if(secs < video.duration){
+    secs = '0' + String(secs);
+  }
+
+  timestamp.innerHTML = `${mins}:${secs}`;
+}
+
+// Set video time to progress
+function setVideoProgress() {
+  video.currentTime = (+progress.value * video.duration) / 100;
+}
+
+// Stop video
+function stopVideo() {
+  video.currentTime = 0;
+  video.pause();
+}
+
+// Event listeners
+video.addEventListener('click', toggleVideoStatus);
+video.addEventListener('pause', updatePlayIcon);
+video.addEventListener('play', updatePlayIcon);
+video.addEventListener('timeupdate', updateProgress);
+
+play.addEventListener('click', toggleVideoStatus);
+
+stop.addEventListener('click', stopVideo);
+
+progress.addEventListener('change', setVideoProgress);
